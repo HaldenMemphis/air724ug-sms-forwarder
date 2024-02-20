@@ -10,10 +10,32 @@ local function getTemperatureCb(_temperature)
     end
 end
 
+-- function getOriginalTemperature()
+--     -- 获取模块温度
+--     misc.getTemperature(getTemperatureCb)
+--     return temperature
+-- end    
+
 function get()
     -- 获取模块温度
     misc.getTemperature(getTemperatureCb)
     return temperature
 end
+
+function checkTemperature( )
+    log.info("util_temperature.checkTemperature","【温度检查】",tonumber(get()))
+    if (config.TEMP_LIMIT <= tonumber(get())) then
+        return true
+    end
+    return false
+end
+
+sys.timerLoopStart(function() 
+    if checkTemperature() then
+        local msg = "【High Temperature】: "
+        util_notify.add(msg .. get())
+    end
+end,config.TEMP_CHECK_INTERVAL)
+
 
 get()

@@ -1,2 +1,4 @@
 .luatide
+.DS_Store
 luatide_project.json
+.idea

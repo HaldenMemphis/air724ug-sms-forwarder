@@ -4,7 +4,7 @@ module(...)
 
 -- 通知类型, 支持配置多个
 -- NOTIFY_TYPE = {"custom_post", "telegram", "pushdeer", "bark", "dingtalk", "feishu", "wecom", "pushover", "inotify", "next-smtp-proxy", "gotify", "serverchan"}
-NOTIFY_TYPE = {"feishu"}
+NOTIFY_TYPE = {"bark"}
 
 -- custom_post 通知配置, 自定义 POST 请求, CUSTOM_POST_BODY_TABLE 中的 {msg} 会被替换为通知内容
 CUSTOM_POST_URL = "https://sctapi.ftqq.com/<SENDKEY>.send"
@@ -20,14 +20,20 @@ CUSTOM_POST_BODY_TABLE = {["title"] = "这里是标题", ["desp"] = "{msg}"}
 -- PUSHDEER_KEY = ""
 
 -- bark 通知配置, https://github.com/Finb/Bark
--- BARK_API = "https://api.day.app"
+BARK_API = "https://api.day.app"
 -- BARK_KEY = ""
+BARK_KEY = "********"
+BARK_ENCRYPT_KEY = "********"
+BARK_ICON = "********"
+BARK_MODE = "ECB"
+BARK_PADDING = "PKCS7"
+
 
 -- dingtalk 通知配置, https://open.dingtalk.com/document/robots/custom-robot-access
 -- DINGTALK_WEBHOOK = "https://oapi.dingtalk.com/robot/send?access_token=xxx"
 
 -- feishu 通知配置, https://open.feishu.cn/document/ukTMukTMukTM/ucTM5YjL3ETO24yNxkjN
-FEISHU_WEBHOOK = "https://open.feishu.cn/open-apis/bot/v2/hook/xxx"
+-- FEISHU_WEBHOOK = "https://open.feishu.cn/open-apis/bot/v2/hook/xxx"
 
 -- wecom 通知配置, https://developer.work.weixin.qq.com/document/path/91770
 -- WECOM_WEBHOOK = "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxx"
@@ -66,7 +72,7 @@ QUERY_TRAFFIC_INTERVAL = 0
 BOOT_NOTIFY = true
 
 -- 通知内容追加更多信息 (通知内容增加会导致流量消耗增加)
-NOTIFY_APPEND_MORE_INFO = true
+NOTIFY_APPEND_MORE_INFO = false
 
 -- 通知最大重发次数
 NOTIFY_RETRY_MAX = 20
@@ -83,13 +89,13 @@ UPLOAD_URL = "http://xxx-123456.cos.ap-nanjing.myqcloud.com/{录音文件目录}
 
 -- 允许发短信控制设备的号码, 如果注释掉或者为空, 则允许所有号码
 -- SMS_CONTROL_WHITELIST_NUMBERS = {"18xxxxxxx", "18xxxxxxx", "18xxxxxxx", "18xxxxxxx"},
-SMS_CONTROL_WHITELIST_NUMBERS = {}
+-- SMS_CONTROL_WHITELIST_NUMBERS = {""}
 
 -- 扬声器 TTS 播放短信内容, 0：关闭(默认)，1：仅验证码，2：全部
 SMS_TTS = 0
 
 -- 电话接通后 TTS 语音内容, 在播放完后开始录音, 如果注释掉或者为空则播放 audio_pickup_record.amr 或 audio_pickup_hangup.amr 文件
--- TTS_TEXT = "您好，请在语音结束后留言，稍后将发送到机主，结束请挂机。"
+TTS_TEXT = "您好,本号码已托管, 无法接听电话, 请短信与机主联系。"
 
 -- 扬声器播放通话声音
 CALL_PLAY_TO_SPEAKER_ENABLE = false
@@ -98,12 +104,21 @@ CALL_PLAY_TO_SPEAKER_ENABLE = false
 CALL_MIC_ENABLE = false
 
 -- 来电动作, 0：无操作，1：接听(默认)，2：挂断, 3：接听后挂断
-CALL_IN_ACTION = 1
+CALL_IN_ACTION = 3
 
 -------------------------------------------------- 其他配置 --------------------------------------------------
 
 -- 扬声器音量, 0-7
-AUDIO_VOLUME = 1
+AUDIO_VOLUME = 0
 
 -- 开启 RNDIS 网卡
 RNDIS_ENABLE = false
+
+-- 温度警告限额
+TEMP_LIMIT = 50.00
+
+-- 温度检查的时间间隔 ms (默认30分钟)
+TEMP_CHECK_INTERVAL = 30*60*1000
+
+-- SIM 卡所属运营商
+SIM_TYPE = "CMHK"

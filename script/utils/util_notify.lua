@@ -19,6 +19,55 @@ local function urlencodeTab(params)
     return table.concat(msg)
 end
 
+--- 构建设备信息字符串, 用于追加到通知消息中
+-- @return (string) 设备信息
+local function buildSimpleDeviceInfo()
+    local msg = "  "
+
+    if (config.SIM_TYPE == nil or config.SIM_TYPE=="") then
+    else
+        msg = msg .. "【" .. config.SIM_TYPE .."】"
+    end
+
+    return msg
+
+end
+
+local function barkAESEncrypt(originData , mode, padding, key)
+
+    log.info("加密前的数据的数据:",originData)
+
+    local barkEncryptKey = key
+
+    local aesData = crypto.aes_encrypt(mode, padding ,originData,barkEncryptKey)
+
+    local encryptData = crypto.base64_encode(aesData, #aesData)
+    log.info("加密后的数据:", encryptData)
+
+    return encryptData
+end
+
+local function checkMsgJSON(msg)
+    
+    local barkBody, result = json.decode(msg)
+
+    if result then
+        if config.NOTIFY_APPEND_MORE_INFO then
+            barkBody["body"] = barkBody["body"] .. buildSimpleDeviceInfo()
+        end
+            return json.encode(barkBody)
+    else
+        local newBarkBody =
+        {
+            title = "Notify",
+            body = msg,
+            group = "sms",
+        } 
+        return json.encode(newBarkBody)
+    end
+    
+end
+
 local notify = {
     -- 发送到 custom_post
     ["custom_post"] = function(msg)
@@ -140,15 +189,39 @@ local notify = {
         end
 
         local header = {
-            ["Content-Type"] = "application/x-www-form-urlencoded"
+            ["Content-Type"] = "application/json"
         }
-        local body = {
-            body = msg
+
+        -- local barkBody, result = json.decode(msg)
+
+        -- if result then
+        --     if config.NOTIFY_APPEND_MORE_INFO then
+        --         barkBody["body"] = barkBody["body"] .. buildSimpleDeviceInfo()
+        --     end
+        --     local jsonBody = json.encode(barkBody)
+        -- else
+        --     local barkBody =
+        --     {
+        --         title = "Notify",
+        --         body = msg,
+        --         group = "sms",
+        --     } 
+        --     local jsonBody = json.encode(barkBody)
+        -- end
+
+        local jsonBody = checkMsgJSON(msg)
+
+        local originBody = {
+            ciphertext = barkAESEncrypt(jsonBody, config.BARK_MODE, config.BARK_PADDING, config.BARK_ENCRYPT_KEY)
         }
-        local url = config.BARK_API .. "/" .. config.BARK_KEY
+
+        local requestBody = json.encode(originBody)
+
+        local url = config.BARK_API .. "/" .. config.BARK_KEY .. "/"
 
         log.info("util_notify", "POST", url)
-        return util_http.fetch(nil, "POST", url, header, urlencodeTab(body))
+        log.info("util_notify", "POST", requestBody)
+        return util_http.fetch(nil, "POST", url, header, requestBody)
     end,
     -- 发送到 dingtalk
     ["dingtalk"] = function(msg)
@@ -326,6 +399,10 @@ local notify = {
     end
 }
 
+
+
+
+
 --- 构建设备信息字符串, 用于追加到通知消息中
 -- @return (string) 设备信息
 local function buildDeviceInfo()
@@ -396,6 +473,14 @@ local function buildDeviceInfo()
     return msg
 end
 
+-- 特殊检查 是否存在bark需要加密的内容存在
+local function checkIfBarkSend(channel)
+    if (channel == "bark") then
+        return true
+    end
+    return false
+end
+
 --- 发送通知
 -- @param msg (string) 通知内容
 -- @param channel (string) 通知渠道
@@ -420,8 +505,8 @@ function send(msg, channel)
     end
 
     -- 通知内容追加设备信息
-    if config.NOTIFY_APPEND_MORE_INFO then
-        msg = msg .. buildDeviceInfo()
+    if config.NOTIFY_APPEND_MORE_INFO and not checkIfBarkSend(channel) then
+        msg = msg .. buildSimpleDeviceInfo()
     end
 
     -- 发送通知

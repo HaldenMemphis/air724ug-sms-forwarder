@@ -111,14 +111,20 @@ end
 local function smsCallback(sender_number, sms_content, datetime)
     log.info("handler_sms.smsCallback", sender_number, datetime, sms_content)
 
+    local barkBody =
+    {
+        title = sender_number,
+        body = sms_content,
+        group = "sms",
+        icon = config.BARK_ICON
+    }
+
+    local jsonBody = json.encode(barkBody)
+
     -- 发送通知
     util_notify.add(
         {
-            sms_content,
-            "",
-            "发件号码: " .. sender_number,
-            "发件时间: " .. datetime,
-            "#SMS"
+            jsonBody
         }
     )
     -- 短信内容匹配

@@ -64,7 +64,7 @@ sys.taskInit(
 
         -- 开机通知
         if nvm.get("BOOT_NOTIFY") then
-            util_notify.add("#BOOT")
+            util_notify.add("【".. nvm.get("SIM_TYPE") .."】".."SMS Follower Power ON")
         end
 
         -- 定时查询流量
