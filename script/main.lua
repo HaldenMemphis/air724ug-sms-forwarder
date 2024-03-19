@@ -30,6 +30,7 @@ require "util_ntp"
 require "handler_call"
 require "handler_powerkey"
 require "handler_sms"
+require "util_battery"
 
 -- 设置音频功放类型
 -- CLASSAB: 0
